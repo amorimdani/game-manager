@@ -16,14 +16,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ludus — Biblioteca de Jogos",
+  title: "Game Manager — Biblioteca de Jogos",
   description:
     "Gerencie seu backlog, jogos em andamento, finalizados, favoritos e próximos lançamentos.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Ludus",
+    title: "Game Manager",
   },
   icons: {
     icon: [

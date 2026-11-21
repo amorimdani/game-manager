@@ -1,6 +1,6 @@
 {
-  "name": "Ludus — Biblioteca de Jogos",
-  "short_name": "Ludus",
+  "name": "Game Manager — Biblioteca de Jogos",
+  "short_name": "Game Manager",
   "description": "Organize sua biblioteca de jogos, backlog, favoritos e próximos lançamentos.",
   "start_url": "/",
   "scope": "/",

@@ -57,10 +57,10 @@ export function AuthView({ onSuccess }: AuthViewProps) {
           </div>
           <div>
             <span className="text-lg font-semibold tracking-tight block leading-none">
-              Ludus
+              Game Manager
             </span>
             <span className="text-[11px] font-mono text-zinc-500 uppercase tracking-wider">
-              Game Library
+              Sua Biblioteca
             </span>
           </div>
         </div>

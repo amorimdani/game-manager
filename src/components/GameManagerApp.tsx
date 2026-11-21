@@ -39,6 +39,7 @@ export function GameManagerApp({
   );
   const [upcoming, setUpcoming] = useState<UpcomingGameItem[]>([]);
   const [upcomingSource, setUpcomingSource] = useState<string>("");
+  const [upcomingSearch, setUpcomingSearch] = useState("");
   const [loadingUpcoming, setLoadingUpcoming] = useState(false);
   const [addingExternalId, setAddingExternalId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(true);
@@ -68,9 +69,13 @@ export function GameManagerApp({
   }
 
   useEffect(() => {
-    if (tab === "upcoming" && upcoming.length === 0) {
+    if (tab !== "upcoming") return;
+    const timer = setTimeout(() => {
       setLoadingUpcoming(true);
-      fetch("/api/upcoming")
+      const qParam = upcomingSearch.trim()
+        ? `?q=${encodeURIComponent(upcomingSearch.trim())}`
+        : "";
+      fetch(`/api/upcoming${qParam}`)
         .then((r) => r.json())
         .then((data: { items: UpcomingGameItem[]; source: string }) => {
           setUpcoming(data.items || []);
@@ -78,8 +83,9 @@ export function GameManagerApp({
         })
         .catch(() => {})
         .finally(() => setLoadingUpcoming(false));
-    }
-  }, [tab, upcoming.length]);
+    }, upcomingSearch.trim() ? 350 : 0);
+    return () => clearTimeout(timer);
+  }, [tab, upcomingSearch]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -166,7 +172,9 @@ export function GameManagerApp({
               <div className="w-7 h-7 rounded-md bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900">
                 <Gamepad2 className="w-4 h-4" />
               </div>
-              <span className="font-semibold tracking-tight text-sm">Ludus</span>
+              <span className="font-semibold tracking-tight text-sm">
+                Game Manager
+              </span>
             </button>
 
             <nav className="hidden sm:flex items-center gap-1">
@@ -374,14 +382,28 @@ export function GameManagerApp({
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">
-                  Próximos Lançamentos
+                  Explorar &amp; Lançamentos
                 </h1>
                 <p className="text-xs text-zinc-500 font-mono">
-                  Radar automático {upcomingSource ? `(${upcomingSource})` : ""}
+                  {upcoming.length} jogos ·{" "}
+                  {upcomingSource === "steam-search"
+                    ? "Busca na Steam"
+                    : "Em breve, populares & épicos"}
                 </p>
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={upcomingSearch}
+                  onChange={(e) => setUpcomingSearch(e.target.value)}
+                  placeholder="Pesquisar qualquer jogo..."
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#111113] focus:outline-none focus:border-rose-600"
+                />
               </div>
             </div>
 
