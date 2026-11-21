@@ -18,7 +18,37 @@ const CACHE_TTL_MS = 1000 * 60 * 30;
 let catalogCache: CacheEntry | null = null;
 const searchCache = new Map<string, CacheEntry>();
 
-const EPIC_CURATED: UpcomingGameItem[] = [
+const EPIC_CURATED: (UpcomingGameItem & { aliases?: string[] })[] = [
+  {
+    externalId: "curated-gta-6",
+    title: "Grand Theft Auto VI (GTA VI)",
+    aliases: ["gta", "gta 6", "gta vi", "grand theft auto 6", "rockstar"],
+    coverUrl: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/271590/header.jpg",
+    platform: "PS5, Xbox Series",
+    genre: "Ação · Mundo Aberto",
+    releaseDate: "Em breve (2026)",
+    source: "curated",
+  },
+  {
+    externalId: "curated-ghost-of-yotei",
+    title: "Ghost of Yōtei",
+    aliases: ["ghost of yotei", "tsushima"],
+    coverUrl: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg",
+    platform: "PS5",
+    genre: "Ação · Aventura",
+    releaseDate: "Em breve",
+    source: "curated",
+  },
+  {
+    externalId: "curated-fable",
+    title: "Fable",
+    aliases: ["fable"],
+    coverUrl: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2769570/header.jpg",
+    platform: "PC, Xbox Series",
+    genre: "Action RPG",
+    releaseDate: "Em breve",
+    source: "curated",
+  },
   {
     externalId: "steam-271590",
     title: "Grand Theft Auto V",
@@ -229,15 +259,26 @@ export async function getUpcomingReleases(query?: string): Promise<{
 }> {
   const q = query?.trim();
   if (q && q.length >= 2) {
+    const qLower = q.toLowerCase();
+    const curatedMatches = EPIC_CURATED.filter(
+      (g) =>
+        g.title.toLowerCase().includes(qLower) ||
+        g.aliases?.some((a) => a.includes(qLower) || qLower.includes(a))
+    ).map(({ aliases: _aliases, ...rest }) => rest);
+
     try {
-      const items = await searchSteamGames(q);
-      return { items, source: "steam-search" };
+      const steamItems = await searchSteamGames(q);
+      const seenTitles = new Set(
+        curatedMatches.map((m) => m.title.toLowerCase())
+      );
+      const merged = [
+        ...curatedMatches,
+        ...steamItems.filter((s) => !seenTitles.has(s.title.toLowerCase())),
+      ];
+      return { items: merged, source: "steam-search" };
     } catch (err) {
       console.warn("[upcoming search] Failed:", err);
-      const localMatches = EPIC_CURATED.filter((g) =>
-        g.title.toLowerCase().includes(q.toLowerCase())
-      );
-      return { items: localMatches, source: "curated" };
+      return { items: curatedMatches, source: "curated" };
     }
   }
 
